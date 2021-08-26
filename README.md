@@ -23,11 +23,33 @@ This is a simple http check plugin, it does not have all the features of the rub
 ## Usage examples
 
 ```bash
-sensu-check-http-go -u https://google.com -c "oogle"
+$ sensu-check-http-go -u https://google.com -c "oogle"
 
 OK: https://google.com, status: 200, String found: oogle
 ```
 
+Help:
+
+```bash
+$ sensu-check-http-go -h
+
+A simple replacement for the ruby based http check for sensu
+
+Usage:
+  sensu-check-http-go [flags]
+  sensu-check-http-go [command]
+
+Available Commands:
+  help        Help about any command
+  version     Print the version number of this plugin
+
+Flags:
+  -c, --checkstring string   String to Match
+  -h, --help                 help for sensu-check-http-go
+  -t, --timeout int          Timeout value in seconds (default 10)
+  -z, --tlstimeout int       TLS handshake timeout in milliseconds (default 1000)
+  -u, --url string           URL to check
+```
 ## Configuration
 
 ### Asset registration

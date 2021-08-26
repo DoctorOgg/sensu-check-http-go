@@ -17,6 +17,7 @@ type Config struct {
 	Url         string
 	CheckString string
 	HttpTimeout int
+	TLStimeout  int
 }
 
 var (
@@ -53,8 +54,17 @@ var (
 			Argument:  "timeout",
 			Shorthand: "t",
 			Default:   10,
-			Usage:     "Timeout value",
+			Usage:     "Timeout value in seconds",
 			Value:     &plugin.HttpTimeout,
+		},
+		&sensu.PluginConfigOption{
+			Path:      "TLSHandshakeTimeout",
+			Env:       "TLSHANDSHAKETIMEOUT",
+			Argument:  "tlstimeout",
+			Shorthand: "z",
+			Default:   1000,
+			Usage:     "TLS handshake timeout in milliseconds",
+			Value:     &plugin.TLStimeout,
 		},
 	}
 )
@@ -73,7 +83,11 @@ func checkArgs(event *types.Event) (int, error) {
 
 func executeCheck(event *types.Event) (int, error) {
 
-	c := http.Client{Timeout: time.Duration(plugin.HttpTimeout) * time.Second}
+	c := http.Client{
+		Timeout:   time.Duration(plugin.HttpTimeout) * time.Second,
+		Transport: &http.Transport{TLSHandshakeTimeout: time.Duration(plugin.TLStimeout) * time.Millisecond},
+	}
+
 	resp, err := c.Get(plugin.Url)
 	if err != nil {
 		fmt.Printf("URL: %s, Error %s", plugin.Url, err)
