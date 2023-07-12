@@ -84,8 +84,11 @@ func checkArgs(event *types.Event) (int, error) {
 func executeCheck(event *types.Event) (int, error) {
 
 	c := http.Client{
-		Timeout:   time.Duration(plugin.HttpTimeout) * time.Second,
-		Transport: &http.Transport{TLSHandshakeTimeout: time.Duration(plugin.TLStimeout) * time.Millisecond},
+		Timeout: time.Duration(plugin.HttpTimeout) * time.Second,
+		Transport: &http.Transport{
+			TLSHandshakeTimeout:   time.Duration(plugin.TLStimeout) * time.Millisecond,
+			ResponseHeaderTimeout: time.Duration(plugin.HttpTimeout) * time.Second,
+		},
 	}
 
 	resp, err := c.Get(plugin.Url)
