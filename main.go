@@ -18,6 +18,7 @@ type Config struct {
 	CheckString string
 	HttpTimeout int
 	TLStimeout  int
+	UserAgent   string
 }
 
 var (
@@ -66,6 +67,15 @@ var (
 			Usage:     "TLS handshake timeout in milliseconds",
 			Value:     &plugin.TLStimeout,
 		},
+		&sensu.PluginConfigOption[string]{
+			Path:      "user-agent",
+			Env:       "CHECK_USER_AGENT",
+			Argument:  "user-agent",
+			Shorthand: "a",
+			Default:   "Mozilla/5.0 (Commodore 64; AIX 11; HP/UX 12) AppleWebKit/42.20 (KHTML, like Gecko) EvilGoogle/96.0.4664.45 SafariRocks/537.36",
+			Usage:     "Custom user agent for the HTTP request",
+			Value:     &plugin.UserAgent,
+		},
 	}
 )
 
@@ -91,7 +101,17 @@ func executeCheck(event *types.Event) (int, error) {
 		},
 	}
 
-	resp, err := c.Get(plugin.Url)
+	req, err := http.NewRequest("GET", plugin.Url, nil)
+	if err != nil {
+		fmt.Printf("Error creating request: %s", err)
+		return sensu.CheckStateCritical, nil
+	}
+
+	// Set the user agent
+	req.Header.Set("User-Agent", plugin.UserAgent)
+
+	// Send the request
+	resp, err := c.Do(req)
 	if err != nil {
 		fmt.Printf("URL: %s, Error %s", plugin.Url, err)
 		return sensu.CheckStateCritical, nil
